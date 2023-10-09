@@ -5,7 +5,7 @@ export default {
   events: [
     {
       http: {
-        method: 'post',
+        method: 'get',
         path: 'products/{id}'
       },
     },
