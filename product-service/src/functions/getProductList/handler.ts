@@ -4,14 +4,18 @@ import { middyfy } from '@libs/lambda';
 
 import schema from './schema';
 import { products } from 'src/mock-data/products';
+import { APIGatewayProxyResult } from 'aws-lambda';
 
-const hello: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async () => {
+const getProductList: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async () => {
   return formatJSONResponse({
     statusCode: 200,
 		body: {
 			products,
 		},
-  });
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
+  }) as APIGatewayProxyResult;
 };
 
-export const main = middyfy(hello);
+export const main = middyfy(getProductList);
