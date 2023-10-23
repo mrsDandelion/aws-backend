@@ -8,7 +8,6 @@ export default {
           bucket: 'aws-uploaded-bucket',
           event: 's3:ObjectCreated:*',
           existing: true,
-          forceDeploy: true,
           rules: [
             {
               prefix: 'uploaded/',

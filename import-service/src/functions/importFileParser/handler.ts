@@ -1,8 +1,9 @@
 
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { formatJSONResponse } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
-import * as csvParser from 'csv-parser';
+
+const csv = require('csv-parser')
 
 const importProductsFile = async (event) => {
   try{
@@ -17,15 +18,26 @@ const importProductsFile = async (event) => {
           Key: `uploaded/${record.s3.object.key}`,
       })
 
-			const stream = await s3Client.send(getCommand)
+			const stream = await s3Client.send(getCommand);
 
 			await new Promise((resolve, reject) => {
-				// stream.Body.pipe(csvParser())
-				// 	.on('open', () => console.log('Opened'))
-				// 	.on('data', (data) => console.log(`Result: ${JSON.stringify(data)}`))
-				// 	.on('error', (err) => reject(err))
-				// 	.on('end', () => resolve('stream closed'))
+				stream.Body.pipe(csv())
+					.on('open', () => console.log('Opened'))
+					.on('data', (data) => console.log(`Result: ${JSON.stringify(data)}`))
+					.on('error', (err) => reject(err))
+					.on('end', () => resolve('stream closed'))
 			});
+
+      await s3Client.send(new CopyObjectCommand({
+          Bucket: bucket,
+          CopySource: `${bucket}/${record.s3.object.key}`,
+          Key: `parsed/${record.s3.object.key}`,
+      }));
+
+      await s3Client.send(new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: `uploaded/${record.s3.object.key}`,
+      }));
 		}
 
     return formatJSONResponse({

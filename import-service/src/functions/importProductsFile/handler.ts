@@ -1,7 +1,7 @@
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
 import { formatJSONResponse } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import {
   getSignedUrl,
 } from "@aws-sdk/s3-request-presigner";
@@ -22,7 +22,7 @@ const importProductsFile: ValidatedEventAPIGatewayProxyEvent<typeof schema> = as
   
     const createPresignedUrlWithClient = ({ region, bucket, key }) => {
       const client = new S3Client({ region });
-      const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+      const command = new PutObjectCommand({ Bucket: bucket, Key: key });
       return getSignedUrl(client, command, { expiresIn: 3600 });
     };
   
