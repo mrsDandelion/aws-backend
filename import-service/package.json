@@ -1,5 +1,5 @@
 {
-  "name": "myservice",
+  "name": "import-service",
   "version": "1.0.0",
   "description": "Serverless aws-nodejs-typescript template",
   "main": "serverless.ts",
@@ -10,10 +10,12 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.433.0",
+    "@aws-sdk/s3-request-presigner": "^3.433.0",
     "@middy/core": "^3.4.0",
     "@middy/http-json-body-parser": "^3.4.0",
-    "aws-sdk": "^2.1473.0",
-    "uuid": "^9.0.1"
+    "aws-sdk": "^2.1478.0",
+    "csv-parser": "^3.0.0"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.0.0",
@@ -22,7 +24,6 @@
     "esbuild": "^0.14.11",
     "json-schema-to-ts": "^1.5.0",
     "serverless": "^3.0.0",
-    "serverless-auto-swagger": "^2.12.0",
     "serverless-esbuild": "^1.23.3",
     "ts-node": "^10.4.0",
     "tsconfig-paths": "^3.9.0",

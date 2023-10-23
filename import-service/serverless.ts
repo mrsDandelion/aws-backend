@@ -1,16 +1,15 @@
 import type { AWS } from '@serverless/typescript';
 
-import { getProductList, getProductById, createProduct } from '@functions/index';
+import importProductsFile from '@functions/importProductsFile';
+import importFileParser from '@functions/importFileParser';
 
 const serverlessConfiguration: AWS = {
-  service: 'product-service',
+  service: 'import-service',
   frameworkVersion: '3',
-  plugins: ['serverless-esbuild', 'serverless-auto-swagger'],
+  plugins: ['serverless-esbuild'],
   provider: {
     name: 'aws',
     runtime: 'nodejs14.x',
-    stage: 'dev',
-    region: 'us-west-1',
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -18,30 +17,35 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
-      PRODUCTS_TABLE: 'AWS_Products',
-			STOCK_TABLE: 'AWS_Stocks'
+    },
+    httpApi: {
+      cors: {
+        allowedOrigins: ['*']
+      }
     },
     iamRoleStatements: [
         {
-          "Effect": "Allow",
-          "Action": [
-            'dynamodb:Scan',
-            "dynamodb:BatchGetItem",
-            "dynamodb:BatchWriteItem",
-            "dynamodb:DeleteItem",
-            "dynamodb:GetItem",
-            "dynamodb:PutItem",
-            "dynamodb:Query",
-            "dynamodb:UpdateItem"
+          'Effect': 'Allow',
+          'Action': [
+            's3:*',
           ],
-          "Resource": [
-            "*"
+          'Resource': [
+            '*'
           ],
+        },
+        {
+          'Effect': 'Allow',
+          'Action': [
+              'logs:CreateLogGroup',
+              'logs:CreateLogStream',
+              'logs:PutLogEvents'
+          ],
+          'Resource': 'arn:aws:logs:*:*:*'
         }
       ]
   },
   // import the function via paths
-  functions: { getProductList, getProductById, createProduct },
+  functions: { importProductsFile, importFileParser },
   package: { individually: true },
   custom: {
     esbuild: {
