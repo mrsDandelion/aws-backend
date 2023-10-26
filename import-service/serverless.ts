@@ -25,7 +25,7 @@ const serverlessConfiguration: AWS = {
             's3:*',
           ],
           'Resource': [
-            '*'
+            'arn:aws:s3:::aws-uploaded-bucket/*'
           ],
         },
         {
@@ -35,8 +35,8 @@ const serverlessConfiguration: AWS = {
               'logs:CreateLogStream',
               'logs:PutLogEvents'
           ],
-          'Resource': 'arn:aws:logs:*:*:*'
-        }
+          'Resource': ['*']
+        },
       ]
   },
   // import the function via paths

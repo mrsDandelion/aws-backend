@@ -29,7 +29,7 @@ const importProductsFile: ValidatedEventAPIGatewayProxyEvent<typeof schema> = as
     const clientUrl = await createPresignedUrlWithClient({
       region: "us-east-1",
       bucket: "aws-uploaded-bucket",
-      key: `uploaded/${event.queryStringParameters}`,
+      key: `uploaded/${event.queryStringParameters.name}`,
     });
     
     return formatJSONResponse({
