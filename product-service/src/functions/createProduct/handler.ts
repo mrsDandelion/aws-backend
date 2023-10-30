@@ -3,30 +3,13 @@ import { formatJSONResponse } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
 
 import schema from './schema';
-import * as AWS from 'aws-sdk';
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { v4 as uuid } from 'uuid';
+import { createProductData, createStockData } from '@libs/db';
 
 const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
   try {
     console.log(event);
-    const dynamo = new AWS.DynamoDB.DocumentClient({
-      region: 'us-east-2'
-    });
-
-    const createProductData = async (item) => {
-      return dynamo.put({
-        TableName: process.env.PRODUCTS_TABLE,
-        Item: item,
-      }).promise();
-    };
-    
-    const createStockData = async (item) => {
-      return dynamo.put({
-        TableName: process.env.STOCK_TABLE,
-        Item: item
-      }).promise();
-    }
 
     const id = uuid();
     const productData = {

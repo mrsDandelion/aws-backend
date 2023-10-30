@@ -1,5 +1,6 @@
 
 import { GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import * as AWS from 'aws-sdk';
 
 const csv = require('csv-parser')
 
@@ -21,10 +22,18 @@ const importProductsFile = async (event) => {
 
       console.log('stream', stream);
 
+      const sqs = new AWS.SQS();
+
 			await new Promise((resolve, reject) => {
 				stream.Body.pipe(csv())
 					.on('open', () => console.log('Opened'))
-					.on('data', (data) => console.log(`Result: ${JSON.stringify(data)}`))
+					.on('data', (data) => {
+            console.log(`Result: ${JSON.stringify(data)}`);
+            sqs.sendMessage({
+              QueueUrl: process.env.SQS_URL,
+              MessageBody: data
+            });
+          })
 					.on('error', (err) => reject(err))
 					.on('end', () => resolve('stream closed'))
 			});
