@@ -22,7 +22,7 @@ const importProductsFile = async (event) => {
 
       console.log('stream', stream);
 
-      const sqs = new AWS.SQS();
+      const sqs = new AWS.SQS({ region: 'us-west-1' });
 
 			await new Promise((resolve, reject) => {
 				stream.Body.pipe(csv())
@@ -31,8 +31,14 @@ const importProductsFile = async (event) => {
             console.log(`Result: ${JSON.stringify(data)}`);
             sqs.sendMessage({
               QueueUrl: process.env.SQS_URL,
-              MessageBody: data
-            });
+              MessageBody: JSON.stringify(data)
+            }, (error, response) => { 
+              if (error) {
+                console.error('Failed to send message:', error);
+              } else {
+                console.log('Message sent successfully:', response);
+              }
+            }).promise();
           })
 					.on('error', (err) => reject(err))
 					.on('end', () => resolve('stream closed'))

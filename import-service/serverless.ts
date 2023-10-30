@@ -41,9 +41,9 @@ const serverlessConfiguration: AWS = {
         {
           "Effect": "Allow",
           "Action": [
-            'sqs:sendMessage'
+            "sqs:*"
           ],
-          "Resource": "*",
+          "Resource": "arn:aws:sqs:us-west-1:925337882584:catalogItemsQueue",
         }
       ]
   },

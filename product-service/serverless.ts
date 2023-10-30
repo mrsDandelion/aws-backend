@@ -54,7 +54,7 @@ const serverlessConfiguration: AWS = {
         {
           Effect: "Allow",
           Action: [
-            'sqs:*'
+            'sns:*'
           ],
           Resource: {
             Ref: 'SNSTopic'
