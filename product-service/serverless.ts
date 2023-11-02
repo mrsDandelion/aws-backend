@@ -79,13 +79,29 @@ const serverlessConfiguration: AWS = {
       SNSTopicSubscription: {
 				Type: 'AWS::SNS::Subscription',
 				Properties: {
+					Endpoint: 'mrsDandelion@yandex.ru',
+					Protocol: 'email',
+					TopicArn: {
+						Ref: 'SNSTopic'
+					},
+          FilterPolicy: {
+            type: ['added less']
+          }
+				}
+			},
+      SNSTopicSubscriptionEmail: {
+				Type: 'AWS::SNS::Subscription',
+				Properties: {
 					Endpoint: 'drachukdarya93@gmail.com',
 					Protocol: 'email',
 					TopicArn: {
 						Ref: 'SNSTopic'
-					}
+					},
+          FilterPolicy: {
+            type: ['added more']
+          }
 				}
-			}
+			},
     },
   },
   // import the function via paths
