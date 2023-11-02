@@ -1,11 +1,9 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { createProductData, createStockData } from '@libs/db';
+import { createProductData, createStockData } from '../../libs/db';
 
-import schema from './schema';
 import { v4 as uuid } from 'uuid';
 import { SNS } from 'aws-sdk';
 
-const catalogBatchProcess: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+const catalogBatchProcess = async (event) => {
   try {
 		const promises = event.Records.map((record) => {
 			const productData = JSON.parse(record.body);
