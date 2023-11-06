@@ -1,5 +1,6 @@
 
 import { GetObjectCommand, CopyObjectCommand, DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import * as AWS from 'aws-sdk';
 
 const csv = require('csv-parser')
 
@@ -21,15 +22,39 @@ const importProductsFile = async (event) => {
 
       console.log('stream', stream);
 
+      const sqs = new AWS.SQS({ region: 'us-west-1' });
+
+      const getQueueUrlFromArn = (arn) => {
+        const [, , , region, accountId, queueName] = arn.split(':');
+        return `https://sqs.${region}.amazonaws.com/${accountId}/${queueName}`;
+      };
+      console.log('process.env.IMPORTED_SQS_QUEUE_ARN', process.env.SQS_QUEUE_ARN);
+
 			await new Promise((resolve, reject) => {
 				stream.Body.pipe(csv())
 					.on('open', () => console.log('Opened'))
-					.on('data', (data) => console.log(`Result: ${JSON.stringify(data)}`))
+					.on('data', async (data) => {
+            console.log(`Result: ${JSON.stringify(data)}`);
+            const parameters = {
+              type: 'added',
+              data: data
+            };
+            await sqs.sendMessage({
+              QueueUrl: getQueueUrlFromArn(process.env.SQS_QUEUE_ARN),
+              MessageBody: JSON.stringify(parameters)
+            }, (error, response) => { 
+              if (error) {
+                console.error('Failed to send message:', error);
+              } else {
+                console.log('Message sent successfully:', response);
+              }
+            }).promise();
+          })
 					.on('error', (err) => reject(err))
 					.on('end', () => resolve('stream closed'))
 			});
 
-      console.log('stream was parsed')
+      console.log('stream was parsed');
 
       await s3Client.send(new CopyObjectCommand({
           Bucket: bucket,

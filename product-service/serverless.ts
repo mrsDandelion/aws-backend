@@ -1,6 +1,6 @@
 import type { AWS } from '@serverless/typescript';
 
-import { getProductList, getProductById, createProduct } from '@functions/index';
+import { getProductList, getProductById, createProduct, catalogBatchProcess } from '@functions/index';
 
 const serverlessConfiguration: AWS = {
   service: 'product-service',
@@ -19,12 +19,16 @@ const serverlessConfiguration: AWS = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
       PRODUCTS_TABLE: 'AWS_Products',
-			STOCK_TABLE: 'AWS_Stocks'
+			STOCK_TABLE: 'AWS_Stocks',
+      SQS_URL: {
+        Ref: 'SQSQueue'
+      },
+      TOPIC_ARN: { Ref: 'SNSTopic' }
     },
     iamRoleStatements: [
         {
-          "Effect": "Allow",
-          "Action": [
+          Effect: "Allow",
+          Action: [
             'dynamodb:Scan',
             "dynamodb:BatchGetItem",
             "dynamodb:BatchWriteItem",
@@ -34,14 +38,74 @@ const serverlessConfiguration: AWS = {
             "dynamodb:Query",
             "dynamodb:UpdateItem"
           ],
-          "Resource": [
+          Resource: [
             "*"
           ],
+        },
+        {
+          Effect: "Allow",
+          Action: [
+            'sqs:*'
+          ],
+          Resource: [
+            { 'Fn::GetAtt': ['SQSQueue', 'Arn'], }
+          ],
+        },
+        {
+          Effect: "Allow",
+          Action: [
+            'sns:*'
+          ],
+          Resource: {
+            Ref: 'SNSTopic'
+          },
         }
       ]
   },
+  resources: {
+    Resources: {
+      SQSQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: 'catalogItemsQueue',
+        },
+      },
+      SNSTopic: {
+				Type: 'AWS::SNS::Topic',
+				Properties: {
+					TopicName: 'createProductTopic'
+				}
+			},
+      SNSTopicSubscription: {
+				Type: 'AWS::SNS::Subscription',
+				Properties: {
+					Endpoint: 'mrsDandelion@yandex.ru',
+					Protocol: 'email',
+					TopicArn: {
+						Ref: 'SNSTopic'
+					},
+          FilterPolicy: {
+            type: ['added less']
+          }
+				}
+			},
+      SNSTopicSubscriptionEmail: {
+				Type: 'AWS::SNS::Subscription',
+				Properties: {
+					Endpoint: 'drachukdarya93@gmail.com',
+					Protocol: 'email',
+					TopicArn: {
+						Ref: 'SNSTopic'
+					},
+          FilterPolicy: {
+            type: ['added more']
+          }
+				}
+			},
+    },
+  },
   // import the function via paths
-  functions: { getProductList, getProductById, createProduct },
+  functions: { getProductList, getProductById, createProduct, catalogBatchProcess },
   package: { individually: true },
   custom: {
     esbuild: {

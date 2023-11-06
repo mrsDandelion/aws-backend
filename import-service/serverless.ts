@@ -17,6 +17,7 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
+      SQS_QUEUE_ARN: 'arn:aws:sqs:us-west-1:925337882584:catalogItemsQueue'
     },
     iamRoleStatements: [
         {
@@ -37,6 +38,13 @@ const serverlessConfiguration: AWS = {
           ],
           'Resource': ['*']
         },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "sqs:*"
+          ],
+          "Resource": "arn:aws:sqs:us-west-1:925337882584:catalogItemsQueue",
+        }
       ]
   },
   // import the function via paths
