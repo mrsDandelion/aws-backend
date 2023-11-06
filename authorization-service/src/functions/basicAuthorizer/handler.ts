@@ -1,5 +1,3 @@
-import { middyfy } from '@libs/lambda';
-
 const basicAuthorizer = async (event, _context, callback) => {
   console.log('event.authorizationToken', event.authorizationToken);
   if (!event.authorizationToken) {
@@ -34,4 +32,4 @@ const basicAuthorizer = async (event, _context, callback) => {
   }  
 };
 
-export const main = middyfy(basicAuthorizer);
+export const main = basicAuthorizer;
